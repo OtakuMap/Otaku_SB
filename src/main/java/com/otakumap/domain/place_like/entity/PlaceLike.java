@@ -30,6 +30,10 @@ public class PlaceLike extends BaseEntity {
     @JoinColumn(name = "place_animation_id", nullable = false)
     private PlaceAnimation placeAnimation;
 
+    @ManyToOne
+    @JoinColumn(name = "place_id", nullable = false)
+    private Place place;
+
     @Column(name = "is_favorite", nullable = false)
     @ColumnDefault("false")
     private Boolean isFavorite;

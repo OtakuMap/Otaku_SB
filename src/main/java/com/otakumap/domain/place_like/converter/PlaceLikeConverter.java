@@ -31,9 +31,10 @@ public class PlaceLikeConverter {
                 .build();
     }
 
-    public static PlaceLike toPlaceLike(User user, PlaceAnimation placeAnimation) {
+    public static PlaceLike toPlaceLike(User user, Place place, PlaceAnimation placeAnimation) {
         return PlaceLike.builder()
                 .user(user)
+                .place(place)
                 .placeAnimation(placeAnimation)
                 .isFavorite(false)
                 .build();

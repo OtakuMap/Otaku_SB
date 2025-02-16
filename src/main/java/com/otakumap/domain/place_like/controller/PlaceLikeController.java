@@ -11,7 +11,6 @@ import com.otakumap.global.apiPayload.ApiResponse;
 
 import com.otakumap.global.validation.annotation.ExistPlace;
 import com.otakumap.global.validation.annotation.ExistPlaceLike;
-import com.otakumap.global.validation.annotation.ExistPlaceListLike;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -44,10 +43,10 @@ public class PlaceLikeController {
     @Operation(summary = "저장된 장소 삭제", description = "저장된 장소를 삭제합니다.")
     @DeleteMapping("")
     @Parameters({
-            @Parameter(name = "placeIds", description = "저장된 장소 id List"),
+            @Parameter(name = "placeIds", description = "장소 id List"),
     })
-    public ApiResponse<String> deletePlaceLike(@RequestParam(required = false) @ExistPlaceListLike List<Long> placeIds) {
-        placeLikeCommandService.deletePlaceLike(placeIds);
+    public ApiResponse<String> deletePlaceLike(@RequestParam(required = false) List<Long> placeIds, @CurrentUser User user) {
+        placeLikeCommandService.deletePlaceLike(placeIds, user);
         return ApiResponse.onSuccess("저장된 장소가 성공적으로 삭제되었습니다");
     }
 

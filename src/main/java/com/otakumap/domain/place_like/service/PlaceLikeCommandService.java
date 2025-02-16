@@ -9,7 +9,7 @@ import java.util.List;
 
 @Service
 public interface PlaceLikeCommandService {
-    void deletePlaceLike(List<Long> placeIds);
+    void deletePlaceLike(List<Long> placeIds, User user);
     void savePlaceLike(User user, Long placeId, PlaceLikeRequestDTO.SavePlaceLikeDTO request);
     PlaceLike favoritePlaceLike(Long placeLikeId, PlaceLikeRequestDTO.FavoriteDTO request);
 }
