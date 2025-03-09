@@ -37,7 +37,7 @@ jobs:
 
       ## yml 파일 생성
       - name: make application.yml
-        if: contains(github.ref, 'dev')
+        if: contains(github.ref, 'ci/#50')
         run: |
           cd ./src/main
           mkdir -p resources
@@ -52,7 +52,7 @@ jobs:
 
       ## docker build & push to production
       - name: Docker build & push to prod
-        if: contains(github.ref, 'dev')
+        if: contains(github.ref, 'ci/#50')
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }} .
@@ -62,7 +62,7 @@ jobs:
       - name: Deploy to prod
         uses: appleboy/ssh-action@v0.1.6
         id: deploy-prod
-        if: contains(github.ref, 'dev')
+        if: contains(github.ref, 'ci/#50')
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
