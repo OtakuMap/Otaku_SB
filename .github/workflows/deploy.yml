@@ -1,10 +1,8 @@
 name: CI/CD using github actions & docker
 
-# event trigger
-# dev 브랜치에 push가 되었을 때 실행
 on:
   push:
-     branches: [ "dev" ]
+    branches: [ "dev", "ci/#50" ]
 
 permissions:
   contents: read
@@ -15,12 +13,11 @@ jobs:
     steps:
       ## JDK setting - github actions에서 사용할 JDK 설정
       - uses: actions/checkout@v3
-
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'temurin'
+          distribution: 'temurin' # https://github.com/actions/setup-java
 
       ## gradle caching - 빌드 시간 향상
       - name: Gradle Caching
@@ -38,10 +35,6 @@ jobs:
         run:
           chmod +x gradlew
 
-      # gradle build
-      - name: Build with Gradle
-        run: ./gradlew build -x test
-
       ## yml 파일 생성
       - name: make application.yml
         if: contains(github.ref, 'dev')
@@ -53,13 +46,17 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" >> ./application.yml
         shell: bash
 
+        # gradle build
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+
       ## docker build & push to production
       - name: Docker build & push to prod
         if: contains(github.ref, 'dev')
         run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }} .
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
 
       ## deploy to production
       - name: Deploy to prod
@@ -70,12 +67,8 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
-          envs: GITHUB_SHA
-          port: 22
           script: |
-            sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             sudo docker rm -f $(docker ps -qa)
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
-            sudo docker-compose down
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
             sudo docker-compose up -d
             sudo docker image prune -f
